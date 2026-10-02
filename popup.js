@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fillOptionsToggle = document.getElementById('fillOptionsToggle');
   const fillCommentsToggle = document.getElementById('fillCommentsToggle');
   const autoSubmitToggle = document.getElementById('autoSubmitToggle');
+  const showCountdownToggle = document.getElementById('showCountdownToggle');
   const fillBtn = document.getElementById('fillBtn');
   const statusText = document.getElementById('statusText');
 
@@ -20,11 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     presetComments: [],
     fillOptions: true,
     fillComments: true,
-    autoSubmit: false
+    autoSubmit: false,
+    showCountdown: true
   };
 
   // 1. Load initial settings from chrome.storage
-  chrome.storage.local.get(['ratingMode', 'commentMode', 'customComment', 'presetComments', 'fillOptions', 'fillComments', 'autoSubmit'], (res) => {
+  chrome.storage.local.get(['ratingMode', 'commentMode', 'customComment', 'presetComments', 'fillOptions', 'fillComments', 'autoSubmit', 'showCountdown'], (res) => {
     if (res.ratingMode) currentSettings.ratingMode = res.ratingMode;
     if (res.commentMode) currentSettings.commentMode = res.commentMode;
     if (res.customComment !== undefined) currentSettings.customComment = res.customComment;
@@ -32,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (res.fillOptions !== undefined) currentSettings.fillOptions = res.fillOptions;
     if (res.fillComments !== undefined) currentSettings.fillComments = res.fillComments;
     if (res.autoSubmit !== undefined) currentSettings.autoSubmit = res.autoSubmit;
+    if (res.showCountdown !== undefined) currentSettings.showCountdown = res.showCountdown;
 
     updateUIState();
   });
@@ -73,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fillOptionsToggle.checked = currentSettings.fillOptions;
     fillCommentsToggle.checked = currentSettings.fillComments;
     autoSubmitToggle.checked = currentSettings.autoSubmit;
+    if (showCountdownToggle) showCountdownToggle.checked = currentSettings.showCountdown !== false;
 
     // Render presets list
     renderPresets();
@@ -126,6 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
     currentSettings.autoSubmit = autoSubmitToggle.checked;
     saveSettings();
   });
+
+  if (showCountdownToggle) {
+    showCountdownToggle.addEventListener('change', () => {
+      currentSettings.showCountdown = showCountdownToggle.checked;
+      saveSettings();
+    });
+  }
 
   // 6. Presets Rendering & Adding/Deleting
   function renderPresets() {
@@ -231,32 +242,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const { radioCount, selectCount, commentCount } = response.stats;
 
       if (currentSettings.autoSubmit) {
-        if (popupCountdownTimer) clearInterval(popupCountdownTimer);
+        if (currentSettings.showCountdown !== false) {
+          if (popupCountdownTimer) clearInterval(popupCountdownTimer);
 
-        let remaining = 3;
-        const btnSpan = fillBtn.querySelector('span');
+          let remaining = 3;
+          statusText.textContent = `Done! Submitting form in ${remaining}s...`;
 
-        statusText.textContent = `Done! Submitting form in ${remaining}s...`;
-        if (btnSpan) btnSpan.textContent = `Submitting form in ${remaining}s...`;
-        fillBtn.disabled = true;
-
-        popupCountdownTimer = setInterval(() => {
-          remaining--;
-          if (remaining > 0) {
-            statusText.textContent = `Done! Submitting form in ${remaining}s...`;
-            if (btnSpan) btnSpan.textContent = `Submitting form in ${remaining}s...`;
-          } else {
-            clearInterval(popupCountdownTimer);
-            popupCountdownTimer = null;
-            statusText.textContent = `Submitted! (${radioCount} radios, ${selectCount} dropdowns & ${commentCount} comments)`;
-            if (btnSpan) btnSpan.textContent = `Form Submitted!`;
-
-            setTimeout(() => {
-              fillBtn.disabled = false;
-              if (btnSpan) btnSpan.textContent = `Autofill Feedback Form`;
-            }, 2500);
-          }
-        }, 1000);
+          popupCountdownTimer = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+              statusText.textContent = `Done! Submitting form in ${remaining}s...`;
+            } else {
+              clearInterval(popupCountdownTimer);
+              popupCountdownTimer = null;
+              statusText.textContent = `Form Submitted! (${radioCount} choices, ${commentCount} comments)`;
+            }
+          }, 1000);
+        } else {
+          statusText.textContent = `Form Submitted! (${radioCount} choices, ${commentCount} comments)`;
+        }
       } else {
         statusText.textContent = `Done! Filled ${radioCount} radios, ${selectCount} dropdowns & ${commentCount} comments.`;
       }

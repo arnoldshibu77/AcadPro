@@ -84,7 +84,8 @@
 
     // 3. Handle Auto Submit / Next Button if enabled
     if (settings.autoSubmit) {
-      triggerAutoSubmitOrNext(3);
+      const countdownSeconds = settings.showCountdown !== false ? 3 : 0;
+      triggerAutoSubmitOrNext(countdownSeconds);
     }
 
     return { radioCount, selectCount, commentCount };
@@ -380,7 +381,15 @@
 
     if (targetBtn) {
       const actionName = (targetBtn.textContent || targetBtn.value || "").toUpperCase().includes('NEXT') ? 'Proceeding to Next Question' : 'Submitting Feedback Form';
-      startSubmissionCountdown(targetBtn, actionName, countdownSeconds);
+      
+      if (countdownSeconds > 0) {
+        startSubmissionCountdown(targetBtn, actionName, countdownSeconds);
+      } else {
+        showToastNotification(`${actionName}... Form Submitted!`, "success");
+        setTimeout(() => {
+          targetBtn.click();
+        }, 150);
+      }
     } else {
       showToastNotification("Autofill completed! Click Submit/Next when ready.", "success");
     }
@@ -420,7 +429,7 @@
       } else {
         if (activeCountdownInterval) clearInterval(activeCountdownInterval);
         activeCountdownInterval = null;
-        showToastNotification(`${actionName} now!`, "success");
+        showToastNotification(`${actionName}... Form Submitted!`, "success");
         setTimeout(() => {
           targetBtn.click();
         }, 200);
