@@ -84,9 +84,7 @@
 
     // 3. Handle Auto Submit / Next Button if enabled
     if (settings.autoSubmit) {
-      setTimeout(() => {
-        triggerAutoSubmitOrNext();
-      }, 800);
+      triggerAutoSubmitOrNext(3);
     }
 
     return { radioCount, selectCount, commentCount };
@@ -350,7 +348,9 @@
     });
   }
 
-  function triggerAutoSubmitOrNext() {
+  let activeCountdownInterval = null;
+
+  function triggerAutoSubmitOrNext(countdownSeconds = 3) {
     const submitSelectors = [
       'input[value*="SUBMIT"]',
       'input[value*="Submit"]',
@@ -379,15 +379,56 @@
     }
 
     if (targetBtn) {
-      const actionName = (targetBtn.textContent || targetBtn.value || "").toUpperCase().includes('NEXT') ? 'Proceeding to Next Question...' : 'Submitting Feedback Form...';
-      showToastNotification(actionName, "info");
-      targetBtn.click();
+      const actionName = (targetBtn.textContent || targetBtn.value || "").toUpperCase().includes('NEXT') ? 'Proceeding to Next Question' : 'Submitting Feedback Form';
+      startSubmissionCountdown(targetBtn, actionName, countdownSeconds);
     } else {
       showToastNotification("Autofill completed! Click Submit/Next when ready.", "success");
     }
   }
 
-  function showToastNotification(message, type = "success") {
+  function startSubmissionCountdown(targetBtn, actionName, seconds) {
+    if (activeCountdownInterval) clearInterval(activeCountdownInterval);
+
+    let remaining = seconds;
+
+    const buildMsg = (sec) => `${actionName} in <strong style="color: #818cf8; font-size: 13px;">${sec}s</strong>... <a href="#" id="cancelSubmitBtn" style="color: #f87171; font-size: 11px; margin-left: 6px; text-decoration: underline;">Cancel</a>`;
+
+    const toast = showToastNotification(buildMsg(remaining), "info", 5000);
+
+    const bindCancel = () => {
+      const cancelBtn = toast ? toast.querySelector('#cancelSubmitBtn') : null;
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (activeCountdownInterval) clearInterval(activeCountdownInterval);
+          activeCountdownInterval = null;
+          showToastNotification("Auto-submit cancelled by user.", "warning");
+        });
+      }
+    };
+
+    bindCancel();
+
+    activeCountdownInterval = setInterval(() => {
+      remaining--;
+      if (remaining > 0) {
+        const msgSpan = toast ? toast.querySelector('.af-toast-msg') : null;
+        if (msgSpan) {
+          msgSpan.innerHTML = buildMsg(remaining);
+          bindCancel();
+        }
+      } else {
+        if (activeCountdownInterval) clearInterval(activeCountdownInterval);
+        activeCountdownInterval = null;
+        showToastNotification(`${actionName} now!`, "success");
+        setTimeout(() => {
+          targetBtn.click();
+        }, 200);
+      }
+    }, 1000);
+  }
+
+  function showToastNotification(message, type = "success", duration = 4500) {
     let existingToast = document.getElementById('acadpro-toast') || document.getElementById('autofeedback-toast');
     if (existingToast) existingToast.remove();
 
@@ -395,8 +436,10 @@
     toast.id = 'acadpro-toast';
     toast.className = `af-toast af-toast-${type}`;
 
+    const iconSymbol = type === 'warning' ? '⚠️' : type === 'info' ? '⏳' : '⚡';
+
     toast.innerHTML = `
-      <div class="af-toast-icon">⚡</div>
+      <div class="af-toast-icon">${iconSymbol}</div>
       <div class="af-toast-content">
         <span class="af-toast-title">AcadPro</span>
         <span class="af-toast-msg">${message}</span>
@@ -407,11 +450,16 @@
     document.body.appendChild(toast);
 
     toast.querySelector('.af-toast-close').addEventListener('click', () => {
+      if (activeCountdownInterval) clearInterval(activeCountdownInterval);
       toast.remove();
     });
 
-    setTimeout(() => {
-      if (toast.parentElement) toast.remove();
-    }, 4500);
+    if (duration > 0) {
+      setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+      }, duration);
+    }
+
+    return toast;
   }
 })();
