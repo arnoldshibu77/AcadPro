@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcadPro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Acad<span class="badge">PRO</span></h1>
+          <p class="subtitle">College Web Portal Auto-Filler</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- Section 1: Rating Preferences -->
+      <section class="card">
+        <div class="card-header">
+          <span class="icon">🎯</span>
+          <h2>Radio & Dropdown Rating</h2>
+        </div>
+        <div class="option-grid">
+          <label class="radio-card selected" data-value="excellent">
+            <input type="radio" name="ratingMode" value="excellent" checked>
+            <div class="radio-content">
+              <span class="emoji">🌟</span>
+              <span class="label">Excellent</span>
+              <span class="subtext">Top Option / 100% / Yes</span>
+            </div>
+          </label>
+          <label class="radio-card" data-value="good">
+            <input type="radio" name="ratingMode" value="good">
+            <div class="radio-content">
+              <span class="emoji">👍</span>
+              <span class="label">Good</span>
+              <span class="subtext">Very Good / 80-90%</span>
+            </div>
+          </label>
+          <label class="radio-card" data-value="varied">
+            <input type="radio" name="ratingMode" value="varied">
+            <div class="radio-content">
+              <span class="emoji">🎲</span>
+              <span class="label">Varied</span>
+              <span class="subtext">Mix of Top & Good</span>
+            </div>
+          </label>
+          <label class="radio-card" data-value="neutral">
+            <input type="radio" name="ratingMode" value="neutral">
+            <div class="radio-content">
+              <span class="emoji">😐</span>
+              <span class="label">Neutral</span>
+              <span class="subtext">Average / Partially</span>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- Section 2: Written Feedback Comments -->
+      <section class="card">
+        <div class="card-header">
+          <span class="icon">💬</span>
+          <h2>Text Comments & Remarks</h2>
+        </div>
+
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="preset">Presets</button>
+          <button class="tab-btn" data-tab="custom">Custom Text</button>
+          <button class="tab-btn" data-tab="smart">Smart AI</button>
+        </div>
+
+        <!-- Preset Mode Panel -->
+        <div class="tab-panel active" id="panel-preset">
+          <div class="preset-info">
+            <span class="preset-count-badge">5 Presets</span>
+            <span>Auto-detects Strength, Weakness & Remarks</span>
+          </div>
+          <div class="preset-list" id="presetList">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="add-preset-row">
+            <input type="text" id="newPresetInput" placeholder="Add custom comment preset...">
+            <button id="addPresetBtn" class="btn-secondary">+</button>
+          </div>
+        </div>
+
+        <!-- Custom Mode Panel -->
+        <div class="tab-panel" id="panel-custom">
+          <textarea id="customCommentText" rows="3" placeholder="Enter text to fill into all comment boxes..."></textarea>
+        </div>
+
+        <!-- Smart Mode Panel -->
+        <div class="tab-panel" id="panel-smart">
+          <div class="smart-box">
+            <p><strong>Contextual AI Matching:</strong> Generates specific comments for Strength & Weakness, Other Remarks, teaching quality, labs, and infrastructure.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Field Targets & Auto-Submit -->
+      <section class="card toggles-card">
+        <div class="toggle-row" style="margin-bottom: 8px;">
+          <div class="toggle-info">
+            <span class="toggle-title">Fill Options (Radios/Dropdowns)</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="fillOptionsToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" style="margin-bottom: 8px;">
+          <div class="toggle-info">
+            <span class="toggle-title">Fill Text Comments & Remarks</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="fillCommentsToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <span class="toggle-title">Auto Click Submit / Next >></span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoSubmitToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Primary Actions -->
+      <div class="actions">
+        <button id="fillBtn" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span>Autofill Feedback Form</span>
+        </button>
+      </div>
+
+      <!-- Quick Status Footer -->
+      <div class="status-bar" id="statusBar">
+        <span class="status-dot"></span>
+        <span id="statusText">Ready for Rajagiri SMS & portal forms</span>
+      </div>
+    </main>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
