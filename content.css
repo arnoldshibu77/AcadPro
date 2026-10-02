@@ -1,8 +1,8 @@
 /* AcadPro - Content Script Toast Overlay Styles */
 #acadpro-toast, #autofeedback-toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  bottom: 24px;
+  right: 24px;
   z-index: 9999999;
   display: flex;
   align-items: center;
@@ -21,7 +21,7 @@
 
 @keyframes afSlideIn {
   from {
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(20px) scale(0.95);
     opacity: 0;
   }
   to {

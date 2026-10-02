@@ -1,4 +1,4 @@
-// AcadPro - Content Script (Optimized for College Web Portals & Rajagiri SMS)
+// AcadPro - Content Script (Optimized for College & University Feedback Portals)
 (function () {
   if (window.hasAcadProInjected || window.hasAutoFeedbackProInjected) return;
   window.hasAcadProInjected = true;

@@ -224,10 +224,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  let popupCountdownTimer = null;
+
   function handleResponse(response) {
     if (response && response.success) {
       const { radioCount, selectCount, commentCount } = response.stats;
-      statusText.textContent = `Done! Filled ${radioCount} radios, ${selectCount} dropdowns & ${commentCount} comments.`;
+
+      if (currentSettings.autoSubmit) {
+        if (popupCountdownTimer) clearInterval(popupCountdownTimer);
+
+        let remaining = 3;
+        const btnSpan = fillBtn.querySelector('span');
+
+        statusText.textContent = `Done! Submitting form in ${remaining}s...`;
+        if (btnSpan) btnSpan.textContent = `Submitting form in ${remaining}s...`;
+        fillBtn.disabled = true;
+
+        popupCountdownTimer = setInterval(() => {
+          remaining--;
+          if (remaining > 0) {
+            statusText.textContent = `Done! Submitting form in ${remaining}s...`;
+            if (btnSpan) btnSpan.textContent = `Submitting form in ${remaining}s...`;
+          } else {
+            clearInterval(popupCountdownTimer);
+            popupCountdownTimer = null;
+            statusText.textContent = `Submitted! (${radioCount} radios, ${selectCount} dropdowns & ${commentCount} comments)`;
+            if (btnSpan) btnSpan.textContent = `Form Submitted!`;
+
+            setTimeout(() => {
+              fillBtn.disabled = false;
+              if (btnSpan) btnSpan.textContent = `Autofill Feedback Form`;
+            }, 2500);
+          }
+        }, 1000);
+      } else {
+        statusText.textContent = `Done! Filled ${radioCount} radios, ${selectCount} dropdowns & ${commentCount} comments.`;
+      }
     } else {
       statusText.textContent = "Autofill complete.";
     }
